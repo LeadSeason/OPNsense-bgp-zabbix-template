@@ -1,0 +1,75 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: 9bff68e7d30a428686890349378b0229
+      template: 'OPNsense bgp by Zabbix agent'
+      name: 'OPNsense bgp by Zabbix agent'
+      groups:
+        - name: Templates
+      items:
+        - uuid: 1e445d9f44c84ccdae45f265698dce31
+          name: 'Bgp neighbors information json'
+          key: routing.bgp.neighbors
+          history: 1h
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+            - type: JSONPATH
+              parameters:
+                - '$.*'
+      discovery_rules:
+        - uuid: 14d5440600b64671aab2aaf87b6a6a98
+          name: 'bgp neighbors discovery'
+          type: DEPENDENT
+          key: bgp.neighbors.discovery
+          delay: '0'
+          item_prototypes:
+            - uuid: ec277ae14e4447fe9ab7dd4c56729a78
+              name: 'Bgp remoteAs - AS{#BGP.REMOTEAS}'
+              type: CALCULATED
+              key: 'bgp.neigbors.as[{#BGP.REMOTEAS}]'
+              value_type: CHAR
+              trends: '0'
+              params: '{#BGP.REMOTEAS}'
+            - uuid: eba11f9290a54a70b9fb0b8ba8872240
+              name: 'Bgp State - AS{#BGP.REMOTEAS}'
+              type: CALCULATED
+              key: 'bgp.neigbors.status[{#BGP.REMOTEAS}]'
+              value_type: CHAR
+              trends: '0'
+              params: '{#BGP.STATE}'
+              trigger_prototypes:
+                - uuid: 6f36532023b5445dbe0b9c190011ba96
+                  expression: 'find(/OPNsense bgp by Zabbix agent/bgp.neigbors.status[{#BGP.REMOTEAS}],,,"Established")=0'
+                  name: 'Bgp session Down  - AS{#BGP.REMOTEAS}'
+                  event_name: 'Bgp session Down  - AS{#BGP.REMOTEAS}'
+                  opdata: 'last(/OPNsense bgp/bgp.neigbors.as[{#BGP.REMOTEAS}])'
+                  priority: HIGH
+            - uuid: 8d19e3746059439daab1ef793c9041ff
+              name: 'Bgp Session Uptime - AS{#BGP.REMOTEAS}'
+              type: CALCULATED
+              key: 'bgp.neigbors.uptime[{#BGP.REMOTEAS}]'
+              units: ms
+              params: '{#BGP.UPMS}'
+              trigger_prototypes:
+                - uuid: 6f5d3695edb047399833543dc0c6313c
+                  expression: 'last(/OPNsense bgp by Zabbix agent/bgp.neigbors.uptime[{#BGP.REMOTEAS}])<600000'
+                  name: 'BGP session has been restarted- AS{#BGP.REMOTEAS}'
+                  event_name: 'Bgp session has been restarted (uptime < 10m)'
+                  priority: WARNING
+                  manual_close: 'YES'
+          master_item:
+            key: routing.bgp.neighbors
+          lld_macro_paths:
+            - lld_macro: '{#BGP.REMOTEAS}'
+              path: $.remoteAs
+            - lld_macro: '{#BGP.STATE}'
+              path: $.bgpState
+            - lld_macro: '{#BGP.UPMS}'
+              path: $.bgpTimerUpMsec
