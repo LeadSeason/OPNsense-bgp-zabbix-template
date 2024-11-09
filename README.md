@@ -1,7 +1,7 @@
 # OPNsense-bgp-zabbix-template
 
 ## Install
-1. Install and setup zabbix agent on OPNsense. OPNsense can be downloaded from System > Firmware > Plugins
+1. Install and setup zabbix agent on OPNsense. Zabbix agent for OPNsense can be downloaded from System > Firmware > Plugins
 2. add `/opt/bin/get-bgp-neigbors.sh` with the following commands.
 ```sh
 mkdir -p /opt/bin/ 
@@ -20,3 +20,37 @@ zabbix ALL = NOPASSWD : /opt/bin/get-bgp-neigbors.sh
    Command `sudo /opt/bin/get-bgp-neigbors.sh`  
    Accept Parameters False
 5. Profit
+
+## Template
+
+### Author
+Leadseason
+
+### Macros used
+There are no marcos in this template.
+
+### Template links
+
+There are no template links in this template.
+
+### Discovery rules
+
+|Name|Description|Type|Key and additional info|
+|----|-----------|----|----|
+|Access point clients discovery|<p>-</p>|`Dependent item`|aruba.ap.clients.discovery|
+
+### Items collected
+
+|Name|Description|Type|Key and additional info|
+|----|-----------|----|----|
+|Bgp neighbors information json||text|routing.bgp.neighbors|
+|Bgp remoteAs - AS{#BGP.REMOTEAS}||Calculated|bgp.neigbors.as[{#BGP.REMOTEAS}]|
+|Bgp Session Uptime - AS{#BGP.REMOTEAS}||Calculated|bgp.neigbors.uptime[{#BGP.REMOTEAS}]|
+|Bgp State - AS{#BGP.REMOTEAS}||Calculated|bgp.neigbors.status[{#BGP.REMOTEAS}]|
+
+### Triggers
+
+|Name|Description|Expression|Priority|
+|----|-----------|----------|--------|
+|Bgp session Down  - AS{#BGP.REMOTEAS}||find(/OPNsense bgp by Zabbix agent/bgp.neigbors.status[{#BGP.REMOTEAS}],,,"Established")=0|High|
+|BGP session has been restarted- AS{#BGP.REMOTEAS}||last(/OPNsense bgp by Zabbix agent/bgp.neigbors.uptime[{#BGP.REMOTEAS}])<600000|Warning|
