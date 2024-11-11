@@ -1,4 +1,7 @@
 # OPNsense-bgp-zabbix-template
+## Overview
+
+Zabbix template to automatically discover setup alerts for bgp peers.
 
 ## Install
 1. Install and setup zabbix agent on OPNsense. Zabbix agent for OPNsense can be downloaded from System > Firmware > Plugins
