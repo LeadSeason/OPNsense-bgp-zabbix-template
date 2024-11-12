@@ -1,7 +1,8 @@
 # OPNsense-bgp-zabbix-template
 ## Overview
 
-Zabbix template to automatically discover setup alerts for bgp peers.
+Monitoring for OPNsense bgp routing. Using LLD discovers and creates items, and triggers for each peer.  
+Template could be adapted for operating systems using vrr, if vtysh is available. 
 
 ## Install
 1. Install and setup zabbix agent on OPNsense. Zabbix agent for OPNsense can be downloaded from System > Firmware > Plugins
